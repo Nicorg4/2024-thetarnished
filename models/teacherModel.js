@@ -38,6 +38,14 @@ const Teacher = sequelize.define('Teacher', {
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: false
+  },
+  avatar_id: {
+    type: DataTypes.INTEGER,
+    defaultValue: 1
+  },
+  signup_date: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW
   }
 }, {
   tableName: 'teachers',

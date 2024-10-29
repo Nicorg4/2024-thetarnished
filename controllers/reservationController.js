@@ -1,5 +1,4 @@
 const Reservation = require('../models/reservationModel');
-const moment = require('moment');
 const sequelize = require('../config/database');
 const { Op } = require('sequelize');
 const Student = require('../models/studentModel');
@@ -9,6 +8,7 @@ const MonthlySchedule = require('../models/monthlyScheduleModel');
 const { sendEmailToUser } = require('./resetController');
 const path = require('path');
 const fs = require('fs');
+require('dotenv').config()
 
 
 const createReservation = async (req, res) => {
@@ -87,12 +87,11 @@ const createReservation = async (req, res) => {
         const teacher = await Teacher.findByPk(teacher_id);
         const teacherName = `${teacher.firstname} ${teacher.lastname}`;
         const teacherEmail = teacher.email;
-
         const student = await Student.findByPk(student_id);
         const studentName = `${student.firstname} ${student.lastname}`;
-        const studentEmail = student.email;
-        //const link = `https://linkandlearn.fpenonori.com/confirm-class/${reservation.id}/${reservation.teacher_id}`;
-        const link = `http://localhost:5173/confirm-class/${reservation.id}/${reservation.teacher_id}`;
+        const URL_SERVER = process.env.URL_SERVER;
+        const confirm_link = `${URL_SERVER}/confirm-class/${reservation.id}/${reservation.teacher_id}`;
+        const reject_link = `${URL_SERVER}/reject-class/${reservation.id}/${reservation.teacher_id}`;
         const filePathTeacher = path.join(__dirname, '../classConfirmationTemplate.html');
         let htmlContentTeacher = fs.readFileSync(filePathTeacher, 'utf-8');
         htmlContentTeacher = htmlContentTeacher
@@ -100,11 +99,13 @@ const createReservation = async (req, res) => {
             .replace(/{{subjectname}}/g, subjectname)
             .replace(/{{formattedDate}}/g, formattedDate)
             .replace(/{{teacherName}}/g, teacherName)
-            .replace(/{{CONFIRMATION_LINK}}/g, link)
+            .replace(/{{CONFIRMATION_LINK}}/g, confirm_link)
+            .replace(/{{REJECTION_LINK}}/g, reject_link)
         setImmediate(async () => {
             try {
                 await sendEmailToUser(teacherEmail, "Reservation Notification", htmlContentTeacher);
             } catch (error) {
+                console.error('Error sending email:', error);
             }
         });
 
@@ -206,7 +207,7 @@ const getReservationsByTeacher = async (req, res) => {
               },
               {
                 model: Subject,
-                attributes: ['subjectname'],
+                attributes: ['subjectid', 'subjectname'],
               },
             ],
             attributes: ['id', 'datetime', 'schedule_id'],
@@ -253,7 +254,8 @@ const getReservationsByTeacher = async (req, res) => {
                     student_id: reservation.Student.studentid,
                     datetime: reservation.datetime,
                     group: isGroupClass,
-                    MonthlyID: reservation.schedule_id 
+                    MonthlyID: reservation.schedule_id,
+                    subject_id: reservation.Subject.subjectid,
                 });
             }
         });

@@ -27,6 +27,11 @@ const Student = sequelize.define('Student', {
   password: {
     type: DataTypes.STRING,
     allowNull: false,
+  },
+  avatar_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 1
   }
 }, {
   tableName: 'students', 

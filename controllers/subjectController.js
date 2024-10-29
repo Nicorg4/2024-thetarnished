@@ -53,9 +53,45 @@ const getAllSubjectsDictatedByTeachers = async (req, res) => {
     }
   };
 
+const updateSubject = async (req, res) =>{
+    const { class_price } = req.body;
+    try{
+        const subject = await Subject.findByPk(req.params.id);
+        if(!subject){
+            return res.status(404).json({
+                message: "Subject not found"
+            });
+        }
+        subject.class_price = class_price;
+        const response = await subject.save();
+        return res.status(200).json(response);
+    }catch(error){
+        /* istanbul ignore next */
+        return res.status(500).json({ message: "Error updating subject" });
+    }
+}
+
+const getSubjectPrice = async (req, res) =>{
+    const { subjectid } = req.params;
+    try{
+        const subject = await Subject.findByPk(subjectid);
+        if(!subject){
+            return res.status(404).json({
+                message: "Subject not found"
+            });
+        }
+        return res.status(200).json(subject.class_price);
+    }catch(error){
+        /* istanbul ignore next */
+        return res.status(500).json({ message: "Error getting subject price" });
+    }
+}
+
 module.exports = {
     getAllSubjects,
     getSubjectById,
     createSubject,
-    getAllSubjectsDictatedByTeachers
+    getAllSubjectsDictatedByTeachers,
+    updateSubject,
+    getSubjectPrice
 };

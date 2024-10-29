@@ -7,7 +7,9 @@ const {
     removeSubjectFromTeacher, 
     getAllTeachersDictatingASubjectById, 
     getAllTeachers, 
-    updateTeacherSubjects} = require('../controllers/teacherController');
+    updateTeacherSubjects,
+    updateTeacherAvatar
+} = require('../controllers/teacherController');
 
 const router = express.Router();
 
@@ -21,5 +23,6 @@ router.delete('/delete/:id', authorizeRoles('TEACHER', 'ADMIN'), deleteTeacher);
 router.post('/assign-subject/:teacherid', authorizeRoles('ADMIN', 'TEACHER'), assignSubjectToTeacher);
 router.delete('/remove-subject/:teacherid/', authorizeRoles('ADMIN', 'TEACHER'), removeSubjectFromTeacher);
 router.put('/update-subjects/:id', updateTeacherSubjects);
+router.put('/update-avatar/:id', authorizeRoles('TEACHER'), updateTeacherAvatar);
 
 module.exports = router;

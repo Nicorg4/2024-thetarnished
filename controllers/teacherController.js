@@ -51,6 +51,23 @@ const updateTeacher = async (req, res) => {
   }
 };
 
+const updateTeacherAvatar = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { avatarId } = req.body;
+    const teacher = await Teacher.findByPk(id);
+    if (!teacher) {
+      return res.status(404).json({ message: 'Teacher not found' });
+    }
+    teacher.avatar_id = avatarId;
+    await teacher.save();
+    return res.status(200).json(teacher);
+  } catch (error) {
+    /* istanbul ignore next */
+    return res.status(400).json({ message: `Error updating teacher: ${error.message}` });
+  }
+};
+
 const deleteTeacher = async (req, res) => {
   try {
     const { id } = req.params;
@@ -188,5 +205,6 @@ module.exports = {
   removeSubjectFromTeacher,
   getAllTeachers,
   getAllTeachersDictatingASubjectById,
-  updateTeacherSubjects
+  updateTeacherSubjects,
+  updateTeacherAvatar
 };

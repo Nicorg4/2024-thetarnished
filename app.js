@@ -10,13 +10,14 @@ const reservationRoutes = require('./routes/reservationRoutes');
 const monthlyScheduleRoutes = require('./routes/monthlyScheduleRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const examRoutes = require('./routes/examRoutes');
+const informationRoutes = require('./routes/informationRoutes');
 const defineAssociations = require('./models/associations');
 const cors = require('cors');
 
 const app = express();
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://192.168.0.105:5173', 'https://linkandlearn.fpenonori.com'],
+  origin: ['http://localhost:5173', 'http://192.168.0.86:5173', 'https://linkandlearn.fpenonori.com', 'http://192.168.0.0/24'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 }));
@@ -33,6 +34,7 @@ app.use('/reservation', reservationRoutes);
 app.use('/classes', monthlyScheduleRoutes);
 app.use('/admins', adminRoutes);
 app.use('/exam', examRoutes);
+app.use('/information', informationRoutes);
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));

@@ -11,6 +11,11 @@ const Subject = sequelize.define('Subject', {
     subjectname: {
         type: DataTypes.STRING(255),
         allowNull: false
+    },
+    class_price: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 100.00
     }
 }, {
     tableName: 'subjects',

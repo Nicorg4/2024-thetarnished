@@ -77,6 +77,7 @@ const createUser = async (req, res) => {
         return res.status(201).json({message: 'User created successfully', user});
     } catch (error){
         /*istanbul ignore next*/
+        console.log(error);
         return res.status(500).json({message: 'Internal server error'});
     }
 };
@@ -171,7 +172,8 @@ const loginUser = async (req, res) => {
             firstname: user.firstname,
             lastname: user.lastname,
             email: user.email,
-            role: role
+            role: role,
+            avatar_id: user.avatar_id
         };
 
         if (role === 'TEACHER') {
