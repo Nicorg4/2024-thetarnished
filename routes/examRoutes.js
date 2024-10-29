@@ -5,6 +5,7 @@ const {
     getExamsByTeacherId,
     getExamsByStudentId,
     getExamsById,
+    initiateExam
 } = require('../controllers/examController');
 
 const router = express.Router();
@@ -13,7 +14,8 @@ router.post('/create-exam', createExamWithQuestions);
 router.delete('/delete-exam', deleteExam);
 router.get('/get-teacher-exams-by/:teacher_id', getExamsByTeacherId);
 router.get('/get-student-exams-by/:student_id', getExamsByStudentId);
-router.get('/get-exams-by/:exam_id', getExamsById)
+router.get('/get-exams-by/:exam_id', getExamsById);
+router.put('/initiate-exam/:exam_id', initiateExam);
 
 
 module.exports = router;

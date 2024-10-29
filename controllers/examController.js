@@ -82,6 +82,8 @@ const deleteExam = async (req, res) => {
             error: err.message,
         });
     }};
+
+
 const getExamsByTeacherId = async (req, res) => {
     try {
         const { teacher_id } = req.params;
@@ -103,16 +105,17 @@ const getExamsByStudentId = async (req, res) => {
         const { student_id } = req.params;
 
         const query = `
-            SELECT e.exam_id, e.exam_name, t.firstname AS teacher_firstname, t.lastname AS teacher_lastname, 
-                   s.subjectname, q.question_id, q.question_text, c.choice_id, c.choice_text, c.is_correct
-            FROM reservations r
-            JOIN exams e ON r.id = e.reservation_id
-            JOIN teachers t ON e.teacher_id = t.teacherid
-            JOIN subjects s ON e.subject_id = s.subjectid
-            JOIN questions q ON e.exam_id = q.exam_id
-            JOIN choices c ON q.question_id = c.question_id
-            WHERE r.student_id = :student_id
-            ORDER BY e.exam_id, q.question_id, c.choice_id;
+                SELECT e.exam_id, e.exam_name, t.firstname AS teacher_firstname, t.lastname AS teacher_lastname, 
+                    s.subjectname, q.question_id, q.question_text, c.choice_id, c.choice_text, c.is_correct
+                FROM reservations r
+                JOIN exams e ON r.id = e.reservation_id
+                JOIN teachers t ON e.teacher_id = t.teacherid
+                JOIN subjects s ON e.subject_id = s.subjectid
+                JOIN questions q ON e.exam_id = q.exam_id
+                JOIN choices c ON q.question_id = c.question_id
+                WHERE r.student_id = :student_id
+                AND e.state = 'CREATED'
+                ORDER BY e.exam_id, q.question_id, c.choice_id;
         `;
 
         const exams = await sequelize.query(query, {
@@ -248,6 +251,25 @@ const getExamsById = async (req, res) => {
     }
 };
 
+const initiateExam = async (req, res) => {
+    try {
+        const { exam_id } = req.params;
+        const exam = await Exam.findByPk(exam_id);
+        if (!exam) {
+            return res.status(404).json({ message: 'Exam not found' });
+        }
+        exam.status = 'INITIATED';
+        await exam.save();
+        return res.status(200).json({ message: 'Exam initiated successfully' });
+    }catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            message: 'Internal server error',
+            error: err.message,
+        });
+    }
+}
+
 
 module.exports = {
     createExamWithQuestions,
@@ -255,5 +277,6 @@ module.exports = {
     getExamsByTeacherId,
     getExamsByStudentId,
     getExamsById,
+    initiateExam
   };
 
