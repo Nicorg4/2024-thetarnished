@@ -64,6 +64,7 @@ const createReservation = async (req, res) => {
             reservation_status: 'pending',
 
         });
+
         const isClassFull = newcurrentstudents === parseInt(schedule.maxstudents) ? true : false; 
         await MonthlySchedule.update({
             istaken: isClassFull,
@@ -88,6 +89,10 @@ const createReservation = async (req, res) => {
         const teacherName = `${teacher.firstname} ${teacher.lastname}`;
         const teacherEmail = teacher.email;
         const student = await Student.findByPk(student_id);
+        student.xp = (Number(student.xp) || 0) + 50;
+        await student.save();
+        teacher.xp = (Number(teacher.xp) || 0) + 50;
+        await teacher.save();
         const studentName = `${student.firstname} ${student.lastname}`;
         const URL_SERVER = process.env.URL_SERVER;
         const confirm_link = `${URL_SERVER}/confirm-class/${reservation.id}/${reservation.teacher_id}`;
@@ -111,6 +116,7 @@ const createReservation = async (req, res) => {
 
         return res.status(201).json(reservation);
     } catch (error) {
+        console.error('Error creating reservation:', error);
         return res.status(500).json({ message: 'Error creating reservation', error });
     }
 };
@@ -518,6 +524,12 @@ const terminateClass = async (req, res) => {
               } 
         }
         reservation.reservation_status = 'terminated';
+        const teacherId = reservation.teacher_id;
+        const teacher = await Teacher.findByPk(teacherId);
+        student.xp = (Number(student.xp) || 0) + 100;
+        await student.save();
+        teacher.xp = (Number(teacher.xp) || 0) + 100;
+        await teacher.save();
         await reservation.save();
         return res.status(200).json({ message: 'Class ended successfully' });
 

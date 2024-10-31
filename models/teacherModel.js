@@ -46,6 +46,11 @@ const Teacher = sequelize.define('Teacher', {
   signup_date: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW
+  },
+  xp: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
   }
 }, {
   tableName: 'teachers',

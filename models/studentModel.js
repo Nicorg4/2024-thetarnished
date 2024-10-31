@@ -32,7 +32,16 @@ const Student = sequelize.define('Student', {
     type: DataTypes.INTEGER,
     allowNull: false,
     defaultValue: 1
-  }
+  },
+  xp: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  },
+  signup_date: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW
+  },
 }, {
   tableName: 'students', 
   timestamps: false 

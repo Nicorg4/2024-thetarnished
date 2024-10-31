@@ -44,6 +44,16 @@ const Exam = sequelize.define('Exam', {
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: DataTypes.NOW,
+  },
+  state: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'CREATED',
+  },
+  score: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
   }
 }, {
   tableName: 'exams',

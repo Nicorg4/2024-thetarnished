@@ -81,7 +81,6 @@ const getGroupClasses = async (req, res) => {
 const assignVacation = async (req, res) => {
   try {
     const { teacherid, startdate, enddate } = req.body;
-    await Teacher.update({ on_vacation: true }, { where: { teacherid: teacherid } })
     const startDate = moment(startdate).startOf('day').toDate();
     const endDate = moment(enddate).endOf('day').toDate();
 
@@ -99,6 +98,7 @@ const assignVacation = async (req, res) => {
     if(takenschedules.length > 0){
       return res.status(403).json({ message: 'cannot set vacations while having booked classes on that time gap' });
     }
+    await Teacher.update({ on_vacation: true }, { where: { teacherid: teacherid } })
     const schedules = await MonthlySchedule.findAll({
       where: {
         teacherid: teacherid, 

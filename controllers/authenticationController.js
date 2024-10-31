@@ -173,7 +173,8 @@ const loginUser = async (req, res) => {
             lastname: user.lastname,
             email: user.email,
             role: role,
-            avatar_id: user.avatar_id
+            avatar_id: user.avatar_id,
+            xp: user.xp,
         };
 
         if (role === 'TEACHER') {
