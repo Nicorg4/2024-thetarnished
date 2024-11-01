@@ -51,6 +51,10 @@ const Teacher = sequelize.define('Teacher', {
     type: DataTypes.INTEGER,
     allowNull: false,
     defaultValue: 0
+  },
+  hasfoundeasteregg:{
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
   }
 }, {
   tableName: 'teachers',

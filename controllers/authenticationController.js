@@ -175,6 +175,7 @@ const loginUser = async (req, res) => {
             role: role,
             avatar_id: user.avatar_id,
             xp: user.xp,
+            hasFoundEasterEgg: user.hasfoundeasteregg
         };
 
         if (role === 'TEACHER') {
@@ -191,6 +192,7 @@ const loginUser = async (req, res) => {
         });
     } catch (error) {
         /* istanbul ignore next */
+        console.log(error);
         return res.status(500).json({ message: 'Internal server error' });
     }
 };
@@ -333,4 +335,25 @@ const verifyUserPassword = async (req, res) => {
     }
 }
 
-module.exports = {loginUser, sendEmailToUser, createUser, changeUserPassword, editProfile, deleteUserAccount, verifyUserPassword};
+const setFoundEasterEggBy = async (req, res) => {
+    try{
+        const {userid} = req.params;
+
+        const student = await Student.findByPk(userid);
+        const teacher = await Teacher.findByPk(userid);
+
+        if(!student && !teacher){
+            return res.status(404).json({message: 'User not found'});
+        }
+        const foundUser = student ? student : teacher;
+
+        foundUser.hasfoundeasteregg = true;
+        await foundUser.save();
+        return res.status(200).json({message: 'Easter egg found'});
+    }catch(error){
+        /* istanbul ignore next */
+        return res.status(500).json({message: 'Internal server error'});
+    }
+}
+
+module.exports = {loginUser, sendEmailToUser, createUser, changeUserPassword, editProfile, deleteUserAccount, verifyUserPassword, setFoundEasterEggBy};

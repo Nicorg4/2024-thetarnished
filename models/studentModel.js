@@ -42,6 +42,10 @@ const Student = sequelize.define('Student', {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW
   },
+  hasfoundeasteregg:{
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  }
 }, {
   tableName: 'students', 
   timestamps: false 
