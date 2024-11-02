@@ -45,7 +45,11 @@ const Student = sequelize.define('Student', {
   hasfoundeasteregg:{
     type: DataTypes.BOOLEAN,
     defaultValue: false
-  }
+  }, 
+  hascompletedquiz:{
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  } 
 }, {
   tableName: 'students', 
   timestamps: false 

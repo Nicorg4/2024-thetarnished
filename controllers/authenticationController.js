@@ -175,7 +175,8 @@ const loginUser = async (req, res) => {
             role: role,
             avatar_id: user.avatar_id,
             xp: user.xp,
-            hasFoundEasterEgg: user.hasfoundeasteregg
+            hasFoundEasterEgg: user.hasfoundeasteregg,
+            hascompletedquiz: user.hascompletedquiz,
         };
 
         if (role === 'TEACHER') {
@@ -189,7 +190,7 @@ const loginUser = async (req, res) => {
             token: token,
             user_schedule: formattedSchedule,
             user_subjects: subjects
-        });
+          });
     } catch (error) {
         /* istanbul ignore next */
         console.log(error);
