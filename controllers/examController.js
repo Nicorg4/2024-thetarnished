@@ -9,6 +9,8 @@ const path = require('path');
 const { sendEmailToUser } = require('./resetController');
 const Student = require('../models/studentModel');
 const Reservation = require('../models/reservationModel');
+const cron = require('node-cron');
+const { Op } = require('sequelize');
 
 
 
@@ -120,7 +122,7 @@ const getExamsByStudentId = async (req, res) => {
                 JOIN questions q ON e.exam_id = q.exam_id
                 JOIN choices c ON q.question_id = c.question_id
                 WHERE r.student_id = :student_id
-                AND e.state = 'CREATED'
+                AND e.state IN ('CREATED', 'INITIATED')
                 ORDER BY e.exam_id, q.question_id, c.choice_id;
         `;
 
@@ -185,9 +187,32 @@ const getExamsByStudentId = async (req, res) => {
 
 const getExamsById = async (req, res) => {
     try {
-        const { exam_id } = req.params;
+        const { exam_id, userid } = req.params;
 
-        const query = `
+        const user = await Student.findByPk(userid);
+        if (!user) {
+            return res.status(404).json({ message: 'Estudiante no encontrado' });
+        }
+
+        const queryReservation = `
+            SELECT e.exam_id
+            FROM reservations r
+            JOIN exams e ON r.id = e.reservation_id
+            WHERE r.student_id = :student_id
+            AND e.exam_id = :exam_id
+            AND e.state = 'INITIATED'
+        `;
+
+        const examReservation = await sequelize.query(queryReservation, {
+            replacements: { student_id: userid, exam_id },
+            type: sequelize.QueryTypes.SELECT
+        });
+
+        if (!examReservation.length) {
+            return res.status(403).json({ message: 'Examen no habilitado para el estudiante' });
+        }
+
+        const queryExamDetails = `
             SELECT e.exam_id, e.exam_name, e.state, t.firstname AS teacher_firstname, t.lastname AS teacher_lastname, 
                    s.subjectname, q.question_id, q.question_text, c.choice_id, c.choice_text, c.is_correct
             FROM exams e
@@ -199,64 +224,61 @@ const getExamsById = async (req, res) => {
             ORDER BY q.question_id, c.choice_id;
         `;
 
-        const exams = await sequelize.query(query, {
+        const examData = await sequelize.query(queryExamDetails, {
             replacements: { exam_id }, 
             type: sequelize.QueryTypes.SELECT
         });
 
-        if (!exams.length) {
-            return res.status(404).json({ message: 'No exam found with this ID' });
+        if (!examData.length) {
+            return res.status(404).json({ message: 'No se encontró un examen con este ID' });
         }
 
-        const formattedExams = {};
-        exams.forEach(exam => {
-            if (!formattedExams[exam.exam_id]) {
-                formattedExams[exam.exam_id] = {
-                    exam_id: exam.exam_id,
-                    exam_name: exam.exam_name,
-                    teacher: {
-                        firstname: exam.teacher_firstname,
-                        lastname: exam.teacher_lastname,
-                    },
-                    subject: exam.subjectname,
-                    questions: {},
-                    state: exam.state,
-                };
-            }
+        const formattedExam = {
+            exam_id: examData[0].exam_id,
+            exam_name: examData[0].exam_name,
+            teacher: {
+                firstname: examData[0].teacher_firstname,
+                lastname: examData[0].teacher_lastname,
+            },
+            subject: examData[0].subjectname,
+            questions: [],
+            state: examData[0].state,
+        };
 
-            if (!formattedExams[exam.exam_id].questions[exam.question_id]) {
-                formattedExams[exam.exam_id].questions[exam.question_id] = {
-                    question_id: exam.question_id,
-                    question_text: exam.question_text,
+        let currentQuestion = null;
+        examData.forEach((row) => {
+            if (!currentQuestion || currentQuestion.question_id !== row.question_id) {
+                if (currentQuestion) {
+                    formattedExam.questions.push(currentQuestion);
+                }
+                currentQuestion = {
+                    question_id: row.question_id,
+                    question_text: row.question_text,
                     choices: [],
                 };
             }
-
-            formattedExams[exam.exam_id].questions[exam.question_id].choices.push({
-                choice_id: exam.choice_id,
-                choice_text: exam.choice_text,
-                is_correct: exam.is_correct,
+            currentQuestion.choices.push({
+                choice_id: row.choice_id,
+                choice_text: row.choice_text,
+                is_correct: row.is_correct,
             });
         });
 
+        if (currentQuestion) {
+            formattedExam.questions.push(currentQuestion);
+        }
 
-        const result = Object.values(formattedExams).map(exam => {
-            return {
-                ...exam,
-                questions: Object.values(exam.questions)
-            };
-        });
-
-        return res.status(200).json(result);
+        return res.status(200).json(formattedExam);
 
     } catch (err) {
         console.error(err);
         return res.status(500).json({
-            message: 'Internal server error',
+            message: 'Error interno del servidor',
             error: err.message,
         });
     }
 };
+
 
 const initiateExam = async (req, res) => {
     try {
@@ -268,6 +290,15 @@ const initiateExam = async (req, res) => {
         }
         exam.state = 'INITIATED';
         await exam.save();
+
+        setTimeout(async () => {
+            const updatedExam = await Exam.findByPk(exam_id);
+            if (updatedExam && updatedExam.state === 'INITIATED') {
+                updatedExam.state = 'FINISHED';
+                await updatedExam.save();
+                console.log(`Exam ${exam_id} set to FINISHED after 30 minutes.`);
+            }
+        }, 1800000);
 
         return res.status(200).json({ message: 'Exam initiated successfully' });
     } catch (err) {
@@ -333,6 +364,8 @@ const submitExam = async (req, res) => {
         });
     }
 };
+
+
 
 module.exports = {
     createExamWithQuestions,

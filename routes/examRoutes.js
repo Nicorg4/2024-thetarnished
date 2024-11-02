@@ -8,16 +8,17 @@ const {
     initiateExam,
     submitExam
 } = require('../controllers/examController');
+const authorizeRoles = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-router.post('/create-exam', createExamWithQuestions);
-router.delete('/delete-exam', deleteExam);
-router.get('/get-teacher-exams-by/:teacher_id', getExamsByTeacherId);
-router.get('/get-student-exams-by/:student_id', getExamsByStudentId);
-router.get('/get-exams-by/:exam_id', getExamsById);
-router.put('/initiate-exam/:exam_id', initiateExam);
-router.put('/submit-exam/:exam_id', submitExam);
+router.post('/create-exam', authorizeRoles('TEACHER'), createExamWithQuestions);
+router.delete('/delete-exam', authorizeRoles('TEACHER'),  deleteExam);
+router.get('/get-teacher-exams-by/:teacher_id', authorizeRoles('TEACHER'), getExamsByTeacherId);
+router.get('/get-student-exams-by/:student_id', authorizeRoles('STUDENT'), getExamsByStudentId);
+router.get('/get-exams-by/:exam_id/:userid', getExamsById);
+router.put('/initiate-exam/:exam_id', authorizeRoles('STUDENT'), initiateExam);
+router.put('/submit-exam/:exam_id', authorizeRoles('STUDENT'), submitExam);
 
 
 module.exports = router;
