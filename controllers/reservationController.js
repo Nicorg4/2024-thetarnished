@@ -609,6 +609,9 @@ const confirmReservation = async (req, res) => {
         if (!reservation) {
             return res.status(404).json({ message: 'Reservation not found' });
         }
+        if (reservation.reservation_status === 'canceled' || reservation.reservation_status === 'finished' || reservation.reservation_status === 'booked') {
+            return res.status(400).json({ message: `Cannot cancel a reservation with status '${reservation.reservation_status}'` });
+        }
         const schedule = await MonthlySchedule.findByPk(reservation.schedule_id);
 	    const date = new Date(schedule.datetime);
         const day = String(date.getDate()).padStart(2, '0');

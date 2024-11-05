@@ -32,7 +32,7 @@ const resetDailyQuiz = async () => {
     try {
         await Student.update({ hascompletedquiz: false }, { where: {} });
         await Teacher.update({ hascompletedquiz: false }, { where: {} });
-        console.log("Daily quiz reset completed at 10:10.");
+        console.log("Daily quiz reset completed at 00:00.");
     } catch (error) {
         console.error("Error resetting daily quiz:", error);
     }

@@ -18,13 +18,18 @@ const cors = require('cors');
 const app = express();
 
 app.use(cors({
-  origin: [
-    'http://localhost:5173', 
-    'http://192.168.0.86:5173', 
-    'https://linkandlearn.fpenonori.com', 
-    'https://2024-thetarnished-frontend-46jb7are6-nicorg4s-projects.vercel.app',
-    'https://2024-thetarnished-frontend-git-mvp4-dev-nicorg4s-projects.vercel.app'
-  ],
+  origin: (origin, callback) => {
+    if (!origin || /https:\/\/.*\.vercel\.app/.test(origin) || [
+        'http://localhost:5173', 
+        'http://192.168.0.86:5173', 
+        'https://linkandlearn.fpenonori.com'
+      ].includes(origin)
+    ) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning']
 }));
