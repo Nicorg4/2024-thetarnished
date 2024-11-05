@@ -57,7 +57,7 @@ const getResetPassword = async (req, res) => {
         }
         const foundUser = student || teacher;
 
-        const secret = process.env.JWT_SECRET + foundUser.password;
+        const secret = process.env.JWT_AUTH_SECRET + foundUser.password;
 
         jwt.verify(token, secret);
 
@@ -88,7 +88,7 @@ const postResetPassword = async (req, res) => {
         }
 
         const foundUser = student || teacher;
-        const secret = process.env.JWT_SECRET + foundUser.password;
+        const secret = process.env.JWT_AUTH_SECRET + foundUser.password;
 
         jwt.verify(token, secret);
 
