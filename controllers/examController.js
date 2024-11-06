@@ -113,7 +113,7 @@ const getExamsByStudentId = async (req, res) => {
         const { student_id } = req.params;
 
         const query = `
-                SELECT e.exam_id, e.exam_name, t.firstname AS teacher_firstname, t.lastname AS teacher_lastname, 
+                SELECT e.exam_id, e.exam_name, e.state, t.firstname AS teacher_firstname, t.lastname AS teacher_lastname, 
                     s.subjectname, q.question_id, q.question_text, c.choice_id, c.choice_text, c.is_correct
                 FROM reservations r
                 JOIN exams e ON r.id = e.reservation_id
@@ -148,6 +148,7 @@ const getExamsByStudentId = async (req, res) => {
                     },
                     subject: exam.subjectname,
                     questions: {},
+                    state: exam.state,
                 };
             }
 
