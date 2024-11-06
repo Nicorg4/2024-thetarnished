@@ -39,7 +39,7 @@ const resetDailyQuiz = async () => {
 };
 
 cron.schedule("0 0 * * *", () => {
-    console.log("Executing daily reset at 10:10...");
+    console.log("Executing daily reset at 00:00...");
     resetDailyQuiz();
 });
 

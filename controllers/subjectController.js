@@ -43,7 +43,8 @@ const getAllSubjectsDictatedByTeachers = async (req, res) => {
         FROM subjects s
         INNER JOIN subjectteacher st ON s.subjectid = st.subjectid
         INNER JOIN monthlyschedule sch ON st.teacherid = sch.teacherid
-        WHERE sch.istaken = false;
+        WHERE sch.istaken = false
+        ORDER BY s.subjectname ASC;
         `);
         
       return res.status(200).json({message: "Subjects retrieved successfully", results});
