@@ -11,7 +11,8 @@ const {
     getInDebtClassesById,
     getPastReservationsByTeacherId,
     getTerminatedReservationsByTeacherId,
-    confirmReservation
+    confirmReservation,
+    rejectReservation
 } = require('../controllers/reservationController');
 
 const authorizeRoles = require('../middleware/authMiddleware');
@@ -30,6 +31,7 @@ router.delete('/cancel-group/:id', authorizeRoles('TEACHER'), cancelGroupClass);
 router.get('/in-debt-classes/:id', authorizeRoles('TEACHER'), getInDebtClassesById);
 router.get('/terminated-reservations-by/:teacher_id', authorizeRoles('TEACHER'), getTerminatedReservationsByTeacherId);
 router.put('/confirm-reservation/:id', confirmReservation);
+router.put('/reject/:id', rejectReservation);
 
 
 

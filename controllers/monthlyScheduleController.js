@@ -163,6 +163,9 @@ const getMonthlyScheduleByTeacherId = async (req, res) => {
       where: {
         teacherid: teacherid,
         istaken: false,
+        datetime: {
+          [Op.gt]: new Date(),
+        },
       },
       order: [['datetime', 'ASC']],
     });

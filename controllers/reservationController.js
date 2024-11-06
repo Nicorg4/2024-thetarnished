@@ -609,7 +609,7 @@ const confirmReservation = async (req, res) => {
         if (!reservation) {
             return res.status(404).json({ message: 'Reservation not found' });
         }
-        if (reservation.reservation_status === 'canceled' || reservation.reservation_status === 'finished' || reservation.reservation_status === 'booked') {
+        if (reservation.reservation_status === 'canceled' || reservation.reservation_status === 'finished' || reservation.reservation_status === 'booked', reservation.reservation_status === 'rejected', reservation.reservation_status === 'terminated') {
             return res.status(400).json({ message: `Cannot cancel a reservation with status '${reservation.reservation_status}'` });
         }
         const schedule = await MonthlySchedule.findByPk(reservation.schedule_id);
@@ -664,6 +664,40 @@ const confirmReservation = async (req, res) => {
     }
 };
 
+const rejectReservation = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const reservation = await Reservation.findByPk(id);
+
+        if (!reservation) {
+            return res.status(404).json({ message: 'Reservation not found' });
+        }
+        if (reservation.reservation_status !== 'pending') {
+            return res.status(400).json({ message: `Cannot cancel a reservation with status '${reservation.reservation_status}'` });
+        }
+
+        reservation.reservation_status = 'rejected';
+        await reservation.save();
+
+        const scheduleid = reservation.schedule_id;
+        const schedule = await MonthlySchedule.findByPk(scheduleid);
+
+        const newcurrentstudents = parseInt(schedule.currentstudents) - 1;
+        await MonthlySchedule.update({
+            istaken: false,
+            currentstudents: newcurrentstudents
+        }, {
+            where: { monthlyscheduleid: scheduleid }
+        });
+
+        return res.status(200).json({ message: 'Reservation rejected successfully' });
+    } catch (error) {
+        console.error('Error rejecting reservation:', error);
+        return res.status(500).json({ message: 'Error rejected reservation', error });
+    }
+};
+
        
 module.exports = {
     createReservation,
@@ -677,5 +711,6 @@ module.exports = {
     getInDebtClassesById,
     getPastReservationsByTeacherId,
     getTerminatedReservationsByTeacherId,
-    confirmReservation
+    confirmReservation,
+    rejectReservation
 };
