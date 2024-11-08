@@ -36,6 +36,23 @@ const updateStudent = async (req, res) => {
     }
   };
 
+  const updateStudentAvatar = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { avatarId } = req.body;
+      const student = await Student.findByPk(id);
+      if (!student) {
+        return res.status(404).json({ message: 'Student not found' });
+      }
+      student.avatar_id = avatarId;
+      await student.save();
+      return res.status(200).json(student);
+    } catch (error) {
+      /* istanbul ignore next */
+      return res.status(400).json({ message: `Error updating student: ${error.message}` });
+    }
+  };
+
   const deleteStudent = async (req, res) => {
     try {
       const { id } = req.params;
@@ -106,5 +123,6 @@ module.exports = {
     getStudentById,
     updateStudent,
     deleteStudent,
-    getPreviousTeachers
+    getPreviousTeachers,
+    updateStudentAvatar,
 }

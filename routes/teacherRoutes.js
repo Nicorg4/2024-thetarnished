@@ -7,17 +7,22 @@ const {
     removeSubjectFromTeacher, 
     getAllTeachersDictatingASubjectById, 
     getAllTeachers, 
-    updateTeacherSubjects} = require('../controllers/teacherController');
+    updateTeacherSubjects,
+    updateTeacherAvatar
+} = require('../controllers/teacherController');
 
 const router = express.Router();
 
-router.get('/all-dictating/:subjectid', getAllTeachersDictatingASubjectById);
+const authorizeRoles = require('../middleware/authMiddleware');
+
+router.get('/all-dictating/:subjectid', authorizeRoles('STUDENT'), getAllTeachersDictatingASubjectById);
 router.get('/all-teachers', getAllTeachers);
-router.get('/:id', getTeacherById);
-router.put('/update/:id', updateTeacher);
-router.delete('/delete/:id', deleteTeacher);
-router.post('/assign-subject/:teacherid', assignSubjectToTeacher);
-router.delete('/remove-subject/:teacherid/', removeSubjectFromTeacher);
+router.get('/:id', authorizeRoles('ADMIN', 'STUDENT', 'TEACHER'), getTeacherById);
+router.put('/update/:id', authorizeRoles('TEACHER'), updateTeacher);
+router.delete('/delete/:id', authorizeRoles('TEACHER', 'ADMIN'), deleteTeacher);
+router.post('/assign-subject/:teacherid', authorizeRoles('ADMIN', 'TEACHER'), assignSubjectToTeacher);
+router.delete('/remove-subject/:teacherid/', authorizeRoles('ADMIN', 'TEACHER'), removeSubjectFromTeacher);
 router.put('/update-subjects/:id', updateTeacherSubjects);
+router.put('/update-avatar/:id', authorizeRoles('TEACHER'), updateTeacherAvatar);
 
 module.exports = router;

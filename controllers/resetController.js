@@ -21,25 +21,23 @@ const postForgotPassword = async (req, res) => {
         const email = req.body.email;
         const student = await Student.findOne({ where: { email: email } });
         const teacher = await Teacher.findOne({ where: { email: email } });
-        if (!student && !teacher) {
-            return res.status(404).json({ message: 'User not found' });
+        if (student || teacher) {
+            const foundUser = student ? student : teacher;
+            const secret = process.env.JWT_AUTH_SECRET + foundUser.password;
+            const payload = {
+                email: email,
+                id: foundUser.studentid || foundUser.teacherid
+            };
+            const token = jwt.sign(payload, secret, { expiresIn: '15m' });
+            const URL_SERVER = process.env.URL_SERVER;
+            const resetLink = `${URL_SERVER}/reset-password/${payload.id}/${token}`;
+            console.log(resetLink);
+            const filePath = path.join(__dirname, '../resetPasswordTemplate.html');
+            let htmlContent = fs.readFileSync(filePath, 'utf-8');
+            htmlContent = htmlContent.replace('${resetLink}', resetLink);
+            sendEmailToUser(email, 'Password reset link', htmlContent);     
         }
-        const foundUser = student ? student : teacher;
-        const secret = process.env.JWT_SECRET + foundUser.password;
-        const payload = {
-            email: email,
-            id: foundUser.studentid || foundUser.teacherid
-        };
-        const token = jwt.sign(payload, secret, { expiresIn: '15m' });
-        const resetLink = `https://linkandlearn.fpenonori.com/reset-password/${payload.id}/${token}`;
-        console.log(resetLink);
-        const filePath = path.join(__dirname, '../resetPasswordTemplate.html');
-        let htmlContent = fs.readFileSync(filePath, 'utf-8');
-        htmlContent = htmlContent.replace('${resetLink}', resetLink);
-        setImmediate(() => {
-            sendEmailToUser(email, 'Password reset link', htmlContent)
-       .catch(() => {});
-        });
+        
         res.status(200).json({ message: 'Password reset link has been sent to your email' });
 
     }catch(error){
@@ -59,7 +57,7 @@ const getResetPassword = async (req, res) => {
         }
         const foundUser = student || teacher;
 
-        const secret = process.env.JWT_SECRET + foundUser.password;
+        const secret = process.env.JWT_AUTH_SECRET + foundUser.password;
 
         jwt.verify(token, secret);
 
@@ -90,7 +88,7 @@ const postResetPassword = async (req, res) => {
         }
 
         const foundUser = student || teacher;
-        const secret = process.env.JWT_SECRET + foundUser.password;
+        const secret = process.env.JWT_AUTH_SECRET + foundUser.password;
 
         jwt.verify(token, secret);
 
@@ -113,7 +111,6 @@ const postResetPassword = async (req, res) => {
 const sendEmailToUser = async (email, subject, html) => {
     try {
         const accessToken = await oAuth2Client.getAccessToken();
-        
         const transport = nodemailer.createTransport({
             service: 'gmail',
             auth: {
@@ -122,7 +119,7 @@ const sendEmailToUser = async (email, subject, html) => {
                 clientId: CLIENT_ID,
                 clientSecret: CLIENT_SECRET,
                 refreshToken: REFRESH_TOKEN,
-                accessToken: accessToken,
+                accessToken: accessToken.token,
             },
         });
 
@@ -135,7 +132,7 @@ const sendEmailToUser = async (email, subject, html) => {
 
         await transport.sendMail(mailOptions);
     } catch (error) {
-        throw error;
+        console.error('Error sending email:', error);
     }
 };
 

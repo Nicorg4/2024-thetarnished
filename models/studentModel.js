@@ -27,7 +27,29 @@ const Student = sequelize.define('Student', {
   password: {
     type: DataTypes.STRING,
     allowNull: false,
-  }
+  },
+  avatar_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 1
+  },
+  xp: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  },
+  signup_date: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW
+  },
+  hasfoundeasteregg:{
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  }, 
+  hascompletedquiz:{
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  } 
 }, {
   tableName: 'students', 
   timestamps: false 

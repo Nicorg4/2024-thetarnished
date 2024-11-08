@@ -1,5 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
+//const Exam = require('./examModel');
+
 
 const Teacher = sequelize.define('Teacher', {
   teacherid: {
@@ -36,10 +38,32 @@ const Teacher = sequelize.define('Teacher', {
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: false
-  }
+  },
+  avatar_id: {
+    type: DataTypes.INTEGER,
+    defaultValue: 1
+  },
+  signup_date: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW
+  },
+  xp: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  },
+  hasfoundeasteregg:{
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
+  hascompletedquiz:{
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  } 
 }, {
   tableName: 'teachers',
   timestamps: false
 });
-
+//Teacher.hasMany(Exam, { foreignKey: 'teacher_id' });
+//Exam.belongsTo(Teacher, { foreignKey: 'teacher_id' });
 module.exports = Teacher;

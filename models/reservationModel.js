@@ -60,6 +60,10 @@ const Reservation = sequelize.define('Reservation', {
     defaultValue: 'cash', 
     allowNull: false,
   },
+  created_at: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
+  }
 
 }, 
 {
