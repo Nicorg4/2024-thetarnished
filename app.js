@@ -12,6 +12,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const examRoutes = require('./routes/examRoutes');
 const informationRoutes = require('./routes/informationRoutes');
 const quizRoutes = require('./routes/quizRoutes');
+const fileRoutes = require('./routes/fileRoutes');
 const defineAssociations = require('./models/associations');
 const cors = require('cors');
 
@@ -49,6 +50,7 @@ app.use('/admins', adminRoutes);
 app.use('/exam', examRoutes);
 app.use('/information', informationRoutes);
 app.use('/quiz', quizRoutes);
+app.use('/files', fileRoutes);
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
