@@ -1,6 +1,6 @@
-const Message = require('../models/messageModel');
+/* const Message = require('../models/messageModel');
 
-getMessages = async (req, res) => {
+const getMessages = async (req, res) => {
   const { roomId } = req.params;
   try {
     const messages = await Message.findAll({
@@ -16,4 +16,4 @@ getMessages = async (req, res) => {
 
 module.exports = {
   getMessages
-};
+}; */

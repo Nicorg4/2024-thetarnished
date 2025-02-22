@@ -69,7 +69,7 @@ app.use('/information', informationRoutes);
 app.use('/quiz', quizRoutes);
 app.use('/files', fileRoutes);
 app.use('/meeting', meetingRoutes);
-app.use('/api/chat', chatRoutes);
+/* app.use('/api/chat', chatRoutes); */
 
 chatSockets(io);
 

@@ -18,6 +18,10 @@ const Message = sequelize.define("Message", {
     type: DataTypes.TEXT,
     allowNull: false,
   },
+  fileid: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   roomId: {
     type: DataTypes.STRING,
     allowNull: false,

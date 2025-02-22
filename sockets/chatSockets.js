@@ -22,7 +22,7 @@ module.exports = (io) => {
       socket.emit('messageHistory', messages);
     });
 
-    socket.on('sendMessage', async ({ studentId, teacherId, message, sender }) => {
+    socket.on('sendMessage', async ({ studentId, teacherId, message, sender, fileid }) => {
       const roomId = getRoomId(studentId, teacherId);
 
       const newMessage = await Message.create({
@@ -31,6 +31,7 @@ module.exports = (io) => {
         sender,
         message,
         roomId,
+        fileid,
       });
 
       io.to(roomId).emit('message', newMessage);

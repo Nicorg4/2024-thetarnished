@@ -13,7 +13,7 @@ const File = sequelize.define('File', {
   },
   teacher_id: {
     type: DataTypes.BIGINT,
-    allowNull: false,
+    allowNull: true,
     references: {
       model: 'teachers',
       key: 'teacherid'

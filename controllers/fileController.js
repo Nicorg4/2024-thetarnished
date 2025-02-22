@@ -240,7 +240,32 @@ const getAllTeacherFiles = async (req, res) => {
     return res.status(500).json({ message: 'Error retrieving files' });
   }
 
-}
+  }
+
+  const uploadChatFile = async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+      
+      const { file } = req;
+      const fileData = {
+        file_path: file.path,
+        filename: file.originalname,
+        mime_type: file.mimetype,
+        size: file.size,
+        created_at: new Date(),
+        teacher_id: null,
+      };
+  
+      const response = await File.create(fileData);
+      return res.status(201).json(response);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Error creating file" });
+    }
+  };
+  
   
 module.exports = {
   uploadFile,
@@ -248,5 +273,6 @@ module.exports = {
   assignFileToStudent,
   downloadFileById,
   getAllTeacherFiles,
-  unassignFileToStudent
+  unassignFileToStudent,
+  uploadChatFile
 };
