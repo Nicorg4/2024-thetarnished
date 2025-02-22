@@ -392,34 +392,26 @@ describe('Teacher API', () => {
   });
 
 it('Should throw an error if the teacher is not found', async () => {
-    // Spy on Teacher.findOne and return null (simulate teacher not found)
     jest.spyOn(Teacher, 'findOne').mockResolvedValue(null);
 
     await expect(updateTeacherSubjects('teacher@example.com', ['1', '2']))
         .rejects.toThrow('Teacher not found');
 
-    // Check that Teacher.findOne was called with the correct email
     expect(Teacher.findOne).toHaveBeenCalledWith({ where: { email: 'teacher@example.com' } });
 });
 
 it('Should call destroy and bulkCreate when valid teacher and subjects are provided', async () => {
-    // Spy on Teacher.findOne and return a fake teacher
     jest.spyOn(Teacher, 'findOne').mockResolvedValue({ teacherid: 1 });
 
-    // Spy on SubjectTeacher.destroy to simulate successful deletion
     const destroySpy = jest.spyOn(SubjectTeacher, 'destroy').mockResolvedValue(true);
 
-    // Spy on SubjectTeacher.bulkCreate to simulate successful bulk insert
     const bulkCreateSpy = jest.spyOn(SubjectTeacher, 'bulkCreate').mockResolvedValue(true);
 
-    // Call the helper function
     await expect(updateTeacherSubjects('teacher@example.com', ['1', '2']))
         .resolves.not.toThrow();
 
-    // Ensure the destroy method was called with the correct teacher ID
     expect(destroySpy).toHaveBeenCalledWith({ where: { teacherid: 1 } });
 
-    // Ensure bulkCreate was called with the correct new relations
     expect(bulkCreateSpy).toHaveBeenCalledWith([
         { teacherid: 1, subjectid: '1' },
         { teacherid: 1, subjectid: '2' }
@@ -427,13 +419,11 @@ it('Should call destroy and bulkCreate when valid teacher and subjects are provi
 });
 
 it('should throw an error if the teacher is not found', async () => {
-  // Spy on Teacher.findOne and return null (simulate teacher not found)
   jest.spyOn(Teacher, 'findOne').mockResolvedValue(null);
 
   await expect(updateTeacherSubjects('teacher@example.com', ['1', '2']))
       .rejects.toThrow('Teacher not found');
 
-  // Check that Teacher.findOne was called with the correct email
   expect(Teacher.findOne).toHaveBeenCalledWith({ where: { email: 'teacher@example.com' } });
   });
 

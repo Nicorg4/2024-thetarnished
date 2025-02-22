@@ -3,6 +3,9 @@ const MonthlySchedule = require('../models/monthlyScheduleModel');
 const Teacher = require('../models/teacherModel');
 const moment = require('moment');
 const Reservation = require('../models/reservationModel');
+const cron = require('node-cron');
+const Schedule= require('../models/weeklyScheduleModel');
+const WeeklySchedule = require('../models/weeklyScheduleModel');
 
 const createMonthlySchedule = async (datetime, teacherid, maxstudents, currentstudents) => {
   try {
@@ -185,6 +188,7 @@ const getMonthlyScheduleByTeacherId = async (req, res) => {
           dayofmonth: dayOfMonth,
           dayofweek: dayOfWeek,
           maxstudents: schedule.maxstudents,
+          month: new Date(schedule.datetime).getMonth() + 1,
         };
       });
 
@@ -266,6 +270,60 @@ const getMonthlySubjectScheduleByTeacherId = async (req, res) => {
     res.status(500).send('Server error');
   }
 };
+
+
+
+
+const generateNextWeekSchedules = async () => {
+  try {
+    const teachers = await Teacher.findAll({ where: { is_active: true } });
+    const today = moment().startOf('day');
+    const endDate = moment().add(28, 'days').endOf('day');
+
+    for (const teacher of teachers) {
+      const weeklySchedules = await WeeklySchedule.findAll({ where: { teacherid: teacher.teacherid } });
+      
+      for (const schedule of weeklySchedules) {
+        for (let i = 0; i <= 28; i++) {
+          const currentDay = today.clone().add(i, 'days');
+          if (currentDay.isoWeekday() === Number(schedule.dayofweek)) {
+            const time = moment(schedule.start_time, 'HH:mm:ss');
+            const scheduledDate = currentDay.clone()
+            .hour(time.hour())
+            .minute(time.minute())
+            .second(time.second())
+            .subtract(3, 'hours');
+            if (scheduledDate.isSameOrBefore(endDate)) {
+              const existingSchedule = await MonthlySchedule.findOne({
+                where: {
+                  teacherid: teacher.teacherid,
+                  datetime: scheduledDate.format('YYYY-MM-DD HH:mm:ss'),
+                },
+              });
+              if (!existingSchedule) {
+                await MonthlySchedule.create({
+                  datetime: scheduledDate.format('YYYY-MM-DD HH:mm:ss'),
+                  teacherid: teacher.teacherid,
+                  maxstudents: schedule.maxstudents,
+                  currentstudents: 0,
+                });
+                console.log(`Schedule created: Teacher ${teacher.teacherid}, Date ${scheduledDate.format('YYYY-MM-DD HH:mm:ss')}`);
+              }
+            }
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error generating next week schedules:', error);
+  }
+};
+
+cron.schedule('6 01 * * *', () => {
+  console.log('Executing daily schedule update.');
+  generateNextWeekSchedules();
+});
+
 
 module.exports = {
   getIndividualClasses,

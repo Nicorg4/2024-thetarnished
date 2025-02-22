@@ -181,7 +181,7 @@ describe('Test the /group-classes endpoint with real database', () => {
         .set('Authorization', `Bearer ${teacherToken}`);
     
         expect(res.statusCode).toBe(200);
-        expect(res.body.length).toBe(2); // Two schedules should be updated
+        expect(res.body.length).toBe(2);
         expect(res.body[0]).toHaveProperty('istaken', true);
         expect(res.body[1]).toHaveProperty('istaken', true);
     });
@@ -261,7 +261,6 @@ describe('Test the /group-classes endpoint with real database', () => {
 
         jest.spyOn(Monthlyschedule, 'findAll').mockRejectedValue(new Error('Database error'));
     
-        // Make a request to the endpoint using supertest
         const res = await request(app).get('/classes/get-monthly-schedule-by/1')
         .set('Authorization', `Bearer ${teacherToken}`);
 

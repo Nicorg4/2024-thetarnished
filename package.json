@@ -30,12 +30,16 @@
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.3",
     "sequelize-mock": "^0.10.2",
+    "socket.io": "^4.8.0",
+    "socket.io-client": "^4.8.0",
+    "socket.io-server": "file:",
     "sqlite3": "^5.1.7",
     "validator": "^13.12.0"
   },
   "devDependencies": {
     "jest": "^29.7.0",
     "mockdate": "^3.0.5",
+    "nodemon": "^3.1.9",
     "supertest": "^7.0.0"
   }
 }

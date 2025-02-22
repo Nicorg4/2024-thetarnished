@@ -10,6 +10,6 @@ router.put('/change-password', authorizeRoles('TEACHER', 'STUDENT'), changeUserP
 router.put('/edit-profile', authorizeRoles('TEACHER', 'STUDENT'), editProfile)
 router.post('/delete-account/:email', verifyUserPassword)
 router.delete('/delete-account', deleteUserAccount)
-router.put('/easteregg/:userid', setFoundEasterEggBy)
+router.put('/easteregg/:userid', authorizeRoles('TEACHER', 'STUDENT', 'ADMIN'), setFoundEasterEggBy)
 
 module.exports = router;

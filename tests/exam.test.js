@@ -149,7 +149,6 @@ describe('Exam API Tests', () => {
         expect(res.statusCode).toBe(200);
         expect(Array.isArray(res.body)).toBe(true);
 
-        // Clean up
         await newExam.destroy();
         await newReservation.destroy();
     });
