@@ -72,13 +72,11 @@ const deleteTeacher = async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Find the teacher by ID
     const teacher = await Teacher.findByPk(id);
     if (!teacher) {
       return res.status(404).json({ message: 'Teacher not found' });
     }
 
-    // Check if the teacher has any reservations
     const reservationsCount = await Reservation.count({
       where: {
         teacher_id: id,
@@ -92,7 +90,6 @@ const deleteTeacher = async (req, res) => {
       return res.status(400).json({ message: 'Cannot delete teacher with existing reservations' });
     }
 
-    // If no reservations, delete the teacher
     await teacher.destroy();
     return res.status(200).json({ message: 'Teacher deleted successfully' });
   } catch (error) {
@@ -197,6 +194,27 @@ const removeSubjectFromTeacher = async (req, res) => {
       }
   };
 
+  const getPreviousStudents = async (req, res) => {
+    try {
+      const { teacher_id } = req.params;
+  
+      const [students] = await sequelize.query(`
+        SELECT DISTINCT s.studentid, s.firstname, s.lastname, s.email
+        FROM public.reservations r
+        JOIN public.students s ON r.student_id = s.studentid
+        WHERE r.teacher_id = :teacher_id;
+        `, {
+        replacements: { teacher_id: teacher_id }, 
+      });
+  
+      return res.status(200).json(students);
+  
+    } catch (error) {
+      /* istanbul ignore next */
+      return res.status(500).json({ message: `Error getting previous students: ${error.message}` });
+    }
+  };
+
 module.exports = {
   getTeacherById,
   updateTeacher,
@@ -206,5 +224,6 @@ module.exports = {
   getAllTeachers,
   getAllTeachersDictatingASubjectById,
   updateTeacherSubjects,
-  updateTeacherAvatar
+  updateTeacherAvatar,
+  getPreviousStudents
 };

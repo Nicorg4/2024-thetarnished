@@ -256,7 +256,6 @@ describe('Reservation Controller Tests', () => {
   it('Should terminate class', async() => {
     
     let teacherId, studentId, monthlyScheduleId, subjectId, reservationId;
-     // Create Teacher
      const teacher = await Teacher.create({
       firstname: 'John',
       lastname: 'Doe',
@@ -264,7 +263,6 @@ describe('Reservation Controller Tests', () => {
       password: 'password',
   });
     teacherId = teacher.teacherid;
-    // Create Student
     const student = await Student.create({
       firstname: 'Jane',
       lastname: 'Doe',
@@ -272,15 +270,13 @@ describe('Reservation Controller Tests', () => {
       password: 'password',
   });
   studentId = student.studentid;
-  // Create Monthly Schedule
   const monthlySchedule = await MonthlySchedule.create({
-    datetime: moment().add(1, 'days').format('YYYY-MM-DD HH:mm:ss'), // Set for a future date
+    datetime: moment().add(1, 'days').format('YYYY-MM-DD HH:mm:ss'),
     teacherid: teacherId,
     maxstudents: 1,
     currentstudents: 0,
   });
   monthlyScheduleId = monthlySchedule.monthlyscheduleid;
-  // Create Subject
   const subject = await Subject.create({
     subjectname: 'Mathematics',
   });
@@ -289,8 +285,8 @@ describe('Reservation Controller Tests', () => {
       student_id: studentId,
       teacher_id: teacherId,
       subject_id: subjectId,
-      schedule_id: monthlyScheduleId, // Use the monthly schedule ID
-      datetime: moment().format('YYYY-MM-DD HH:mm:ss'), // Current datetime
+      schedule_id: monthlyScheduleId,
+      datetime: moment().format('YYYY-MM-DD HH:mm:ss'),
       payment_method: 'CASH',
 
   });
@@ -300,12 +296,10 @@ describe('Reservation Controller Tests', () => {
   const res = await request(app)
             .delete(`/reservation/terminate/${reservationId}`)
             .send({ valor: 100 })
-            .set('Authorization', `Bearer ${studentToken}`); // Send any required payload
+            .set('Authorization', `Bearer ${studentToken}`);
             const reservationCreated = await Reservation.findByPk(reservationId);
             await MonthlySchedule.destroy({ where: { monthlyscheduleid: monthlyScheduleId } });
 
-
-            // Check if the class was terminated successfully
             expect(res.status).toBe(200);
             expect(reservationCreated.reservation_status).toBe('terminated');
             
@@ -315,7 +309,6 @@ describe('Reservation Controller Tests', () => {
   it('Should confirm the payment successfully', async () => {
 
     let teacherId, studentId, monthlyScheduleId, subjectId, reservationId;
-     // Create Teacher
      const teacher = await Teacher.create({
       firstname: 'John',
       lastname: 'Doe',
@@ -323,7 +316,6 @@ describe('Reservation Controller Tests', () => {
       password: 'password',
   });
     teacherId = teacher.teacherid;
-    // Create Student
     const student = await Student.create({
       firstname: 'Jane',
       lastname: 'Doe',
@@ -331,15 +323,13 @@ describe('Reservation Controller Tests', () => {
       password: 'password',
   });
   studentId = student.studentid;
-  // Create Monthly Schedule
   const monthlySchedule = await MonthlySchedule.create({
-    datetime: moment().add(1, 'days').format('YYYY-MM-DD HH:mm:ss'), // Set for a future date
+    datetime: moment().add(1, 'days').format('YYYY-MM-DD HH:mm:ss'),
     teacherid: teacherId,
     maxstudents: 1,
     currentstudents: 0,
   });
   monthlyScheduleId = monthlySchedule.monthlyscheduleid;
-  // Create Subject
   const subject = await Subject.create({
     subjectname: 'Mathematics',
   });
@@ -348,37 +338,33 @@ describe('Reservation Controller Tests', () => {
       student_id: studentId,
       teacher_id: teacherId,
       subject_id: subjectId,
-      schedule_id: monthlyScheduleId, // Use the monthly schedule ID
-      datetime: moment().format('YYYY-MM-DD HH:mm:ss'), // Current datetime
+      schedule_id: monthlyScheduleId,
+      datetime: moment().format('YYYY-MM-DD HH:mm:ss'),
       payment_method: 'CASH',
 
   });
   
   reservationId = reservation.id;
     const reqBody = { //esto mockeamos que es lo que nos mandan ellos.
-        id_reserva: reservationId, // Use the real reservation ID
-        email: 'test@example.com', // Example email
-        reservationStatus: 'aceptada', // Status that confirms payment
+        id_reserva: reservationId, 
+        email: 'test@example.com', 
+        reservationStatus: 'aceptada', 
     };
 
-    // Send a request to the confirmPayment route (assumed to be a POST request)
     const res = await request(app)
-        .put('/reservation/confirm') // Adjust this to your actual route
+        .put('/reservation/confirm') 
         .send(reqBody)
         .set('Authorization', `Bearer ${studentToken}`);
 
-    // Check if the reservation status was updated correctly
     const updatedReservation = await Reservation.findByPk(reservationId);
     expect(updatedReservation.reservation_status).toBe('paid');
 
-    // Verify the response from the API
     expect(res.status).toBe(200);
     expect(res.body.message).toBe('Payment confirmed successfully');
 });
 it('Should deny the payment', async () => {
 
   let teacherId, studentId, monthlyScheduleId, subjectId, reservationId;
-   // Create Teacher
    const teacher = await Teacher.create({
     firstname: 'John',
     lastname: 'Doe',
@@ -386,7 +372,6 @@ it('Should deny the payment', async () => {
     password: 'password',
 });
   teacherId = teacher.teacherid;
-  // Create Student
   const student = await Student.create({
     firstname: 'Jane',
     lastname: 'Doe',
@@ -394,15 +379,13 @@ it('Should deny the payment', async () => {
     password: 'password',
 });
 studentId = student.studentid;
-// Create Monthly Schedule
 const monthlySchedule = await MonthlySchedule.create({
-  datetime: moment().add(1, 'days').format('YYYY-MM-DD HH:mm:ss'), // Set for a future date
+  datetime: moment().add(1, 'days').format('YYYY-MM-DD HH:mm:ss'),
   teacherid: teacherId,
   maxstudents: 1,
   currentstudents: 0,
 });
 monthlyScheduleId = monthlySchedule.monthlyscheduleid;
-// Create Subject
 const subject = await Subject.create({
   subjectname: 'Mathematics',
 });
@@ -411,42 +394,39 @@ const subject = await Subject.create({
     student_id: studentId,
     teacher_id: teacherId,
     subject_id: subjectId,
-    schedule_id: monthlyScheduleId, // Use the monthly schedule ID
-    datetime: moment().format('YYYY-MM-DD HH:mm:ss'), // Current datetime
+    schedule_id: monthlyScheduleId,
+    datetime: moment().format('YYYY-MM-DD HH:mm:ss'),
     payment_method: 'CASH',
 
 });
 
 reservationId = reservation.id;
   const reqBody = { //esto mockeamos que es lo que nos mandan ellos.
-      id_reserva: reservationId, // Use the real reservation ID
-      email: 'juancito@example.com', // Example email
-      reservationStatus: 'rechazada', // Status that confirms payment
+      id_reserva: reservationId,
+      email: 'juancito@example.com', 
+      reservationStatus: 'rechazada', 
   };
 
-  // Send a request to the confirmPayment route (assumed to be a POST request)
   const res = await request(app)
-      .put('/reservation/confirm') // Adjust this to your actual route
+      .put('/reservation/confirm') 
       .send(reqBody)
       .set('Authorization', `Bearer ${studentToken}`);
 
-  // Check if the reservation status was updated correctly
   const updatedReservation = await Reservation.findByPk(reservationId);
   expect(updatedReservation.reservation_status).toBe('in debt');
 
-  // Verify the response from the API
   expect(res.status).toBe(200);
   expect(res.body.message).toBe('Transaction rejected successfully');
 });
 
 it('Should return 404 if the reservation does not exist when confirming payment', async () => {
   const reqBody = { //esto mockeamos que es lo que nos mandan ellos.
-    id_reserva: "123133", // Use the real reservation ID
-    email: 'juancito@example.com', // Example email
-    reservationStatus: 'rechazada', // Status that confirms payment
+    id_reserva: "123133",
+    email: 'juancito@example.com',
+    reservationStatus: 'rechazada',
 };
 const res = await request(app)
-      .put('/reservation/confirm') // Adjust this to your actual route
+      .put('/reservation/confirm')
       .send(reqBody)
       .set('Authorization', `Bearer ${studentToken}`);
 

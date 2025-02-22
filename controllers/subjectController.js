@@ -1,5 +1,8 @@
 const sequelize = require('../config/database');
 const Subject = require('../models/subjectModel');
+const path = require('path');
+const fs = require('fs');
+const { sendEmailToUser } = require('./resetController');
 
 const getAllSubjects = async (req, res) =>{
     const response = await Subject.findAll({
@@ -63,6 +66,40 @@ const updateSubject = async (req, res) =>{
                 message: "Subject not found"
             });
         }
+        
+        /* const teachers = await sequelize.query(
+            `SELECT t.teacherid, t.firstname, t.lastname, t.email, s.subjectname AS subject_name
+             FROM "teachers" t
+             JOIN "subjectteacher" st ON t.teacherid = st.teacherid
+             JOIN "subjects" s ON st.subjectid = s.subjectid
+             WHERE s.subjectid = :subjectid;`,
+            {
+                replacements: { subjectid: subject.subjectid },
+            }
+        );
+        const teacherList = teachers[0]
+        const recipientEmails = teacherList.map(teacher => teacher.email).filter(email => email);
+        if (recipientEmails.length === 0) {
+            return res.status(201).json({ message: 'No teachers found for this subject' });
+        }else{
+            const templatePath = path.join(__dirname, '../priceUpdateTemplate.html');
+            let htmlContent = fs.readFileSync(templatePath, 'utf8');
+
+            htmlContent = htmlContent.replace(/{{subjectName}}/g, subject.subjectname)
+                                    .replace(/{{newPrice}}/g, class_price);
+
+            for (const teacher of teachers) {
+                personalizedContent = htmlContent.replace(/{{teacherName}}/g, teacher.firstname + teacher.lastname);
+                setImmediate(async () => {
+                    try {
+                        await sendEmailToUser(teacher[0].email, "Class Price Updated", personalizedContent);
+                    } catch (error) {
+                        console.error(`Failed to send email to ${teacher[0].email}:`, error);
+                    }
+                });
+            }
+        } */
+
         subject.class_price = class_price;
         const response = await subject.save();
         return res.status(200).json(response);

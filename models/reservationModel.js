@@ -3,6 +3,7 @@ const sequelize = require('../config/database');
 const Student = require('./studentModel');
 const Subject = require('./subjectModel');
 const Teacher = require('./teacherModel');
+const Meeting = require('./meetingModel');
 
 const Reservation = sequelize.define('Reservation', {
   id: {
@@ -63,6 +64,15 @@ const Reservation = sequelize.define('Reservation', {
   created_at: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
+  },
+  meeting_id: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    references: {
+      model: 'meetings',
+      key: 'id',
+    },
+    onDelete: 'SET NULL',
   }
 
 }, 
@@ -74,5 +84,6 @@ const Reservation = sequelize.define('Reservation', {
 Reservation.belongsTo(Student, { foreignKey: 'student_id' });
 Reservation.belongsTo(Subject, { foreignKey: 'subject_id' });
 Reservation.belongsTo(Teacher, { foreignKey: 'teacher_id' });
+Reservation.belongsTo(Meeting, { foreignKey: 'meeting_id' });
 
 module.exports = Reservation;

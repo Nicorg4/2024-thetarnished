@@ -192,7 +192,7 @@ const getExamsById = async (req, res) => {
 
         const user = await Student.findByPk(userid);
         if (!user) {
-            return res.status(404).json({ message: 'Estudiante no encontrado' });
+            return res.status(404).json({ message: 'Student not found' });
         }
 
         const queryReservation = `
@@ -210,7 +210,7 @@ const getExamsById = async (req, res) => {
         });
 
         if (!examReservation.length) {
-            return res.status(403).json({ message: 'Examen no habilitado para el estudiante' });
+            return res.status(403).json({ message: 'Exam is unavailable for this student' });
         }
 
         const queryExamDetails = `
@@ -231,7 +231,7 @@ const getExamsById = async (req, res) => {
         });
 
         if (!examData.length) {
-            return res.status(404).json({ message: 'No se encontró un examen con este ID' });
+            return res.status(404).json({ message: 'Exam not found' });;
         }
 
         const formattedExam = {
@@ -274,7 +274,7 @@ const getExamsById = async (req, res) => {
     } catch (err) {
         console.error(err);
         return res.status(500).json({
-            message: 'Error interno del servidor',
+            message: 'Internal server error',
             error: err.message,
         });
     }

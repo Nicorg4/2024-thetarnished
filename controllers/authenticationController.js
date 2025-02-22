@@ -29,12 +29,15 @@ const createUser = async (req, res) => {
         }
         const query = `
             SELECT * FROM (
-            SELECT studentid, firstname, lastname, email, 'STUDENT' as role FROM students
-            UNION ALL
-            SELECT teacherid, firstname, lastname, email, 'TEACHER' as role FROM teachers
-            ) as users
-            WHERE email = ? LIMIT 1;
-        `;
+                SELECT studentid AS id, firstname, lastname, email, 'STUDENT' AS role FROM students
+                UNION ALL
+                SELECT teacherid AS id, firstname, lastname, email, 'TEACHER' AS role FROM teachers
+                UNION ALL
+                SELECT adminid AS id, firstname, lastname, email, 'ADMIN' AS role FROM admins
+            ) AS users
+            WHERE email = ? 
+            LIMIT 1;
+            `;
           
           const [user] = await sequelize.query(query, {
               replacements: [email],
@@ -282,19 +285,16 @@ const deleteUserAccount = async (req, res) => {
             });
         }
 
-        // If a blocking reservation exists (future reservation not canceled or in debt), prevent deletion
         if (reservationBlockExists) {
             return res.status(400).json({ message: 'Cannot delete user with active or in debt reservations' });
         }
 
-        // Delete the user if no blocking reservations exist
         if (user instanceof Student) {
             await Student.destroy({ where: { email: email } });
         } else if (user instanceof Teacher) {
             await Teacher.destroy({ where: { email: email } });
         }
 
-        // Send account deletion notification
         const filePath = path.join(__dirname, '../deleteNotificationTemplate.html');
         let htmlContent = fs.readFileSync(filePath, 'utf-8');
 

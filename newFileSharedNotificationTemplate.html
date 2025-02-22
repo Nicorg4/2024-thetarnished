@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Class Notification</title>
+  <title>New Study Material</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -41,29 +41,39 @@
       font-size: 12px;
       color: #888888;
     }
+    .button {
+      display: inline-block;
+      padding: 10px 15px;
+      margin-top: 10px;
+      background-color: #4CAF50;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body>
 
   <div class="email-container">
     <div class="header">
-      <h1>Class Notification</h1>
+      <h1>New Study Material Available</h1>
     </div>
 
     <div class="content">
-      <p>Dear Professor,</p>
-
-      <p>We would like to inform you that the class for the subject<strong>{{subjectname}}</strong> with student <strong>{{studentName}}</strong> has been confirmed.</p>
-
-      <p><strong>Class Details:</strong></p>
+      <p>Dear Student,</p>
+      
+      <p>Your teacher, <strong>{{teacherName}}</strong>, has shared a new study material.</p>
+      
+      <p><strong>Material Details:</strong></p>
       <ul>
-        <li><strong>Student Name:</strong> {{studentName}}</li>
-        <li><strong>Subject:</strong> {{subjectname}}</li>
-        <li><strong>Date and Time:</strong> {{formattedDate}}</li>
+        <li><strong>Title:</strong> {{fileTitle}}</li>
+        <li><strong>Date Shared:</strong> {{formattedDate}}</li>
       </ul>
-
-      <p>If you have any questions or need further information, please do not hesitate to contact us.</p>
-
+      
+      <p>You can access the material using the link below:</p>
+      <p><a href="{{fileLink}}" class="button">View Material</a></p>
+      
+      <p>Happy studying!</p>
       <p>Best regards,</p>
       <p>The Coordination Team</p>
     </div>
