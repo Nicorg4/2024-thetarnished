@@ -661,7 +661,7 @@ const confirmReservation = async (req, res) => {
         if (!reservation) {
             return res.status(404).json({ message: 'Reservation not found' });
         }
-        if (reservation.reservation_status === 'canceled' || reservation.reservation_status === 'finished' || reservation.reservation_status === 'booked', reservation.reservation_status === 'rejected', reservation.reservation_status === 'terminated') {
+        if (reservation.reservation_status !== 'pending') {
             return res.status(400).json({ message: `This class has already been confirmed or rejected` });
         }
         
