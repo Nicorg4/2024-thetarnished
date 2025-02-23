@@ -657,9 +657,13 @@ const getInDebtClassesById = async (req, res) => {
 const confirmReservation = async (req, res) => {
     try {
         const { id } = req.params;
+        const { teacher_id } = req.body;
         const reservation = await Reservation.findByPk(id);
         if (!reservation) {
             return res.status(404).json({ message: 'Reservation not found' });
+        }
+        if (reservation.teacher_id !== teacher_id) {
+            return res.status(403).json({ message: 'You are not authorized to confirm this reservation. Try logging in with the correct account.' });
         }
         if (reservation.reservation_status !== 'pending') {
             return res.status(400).json({ message: `This class has already been confirmed or rejected` });
@@ -723,15 +727,20 @@ const confirmReservation = async (req, res) => {
 const rejectReservation = async (req, res) => {
     try {
         const { id } = req.params;
+        const { teacher_id } = req.body;
 
         const reservation = await Reservation.findByPk(id);
 
         if (!reservation) {
             return res.status(404).json({ message: 'Reservation not found' });
         }
+        if (reservation.teacher_id !== teacher_id) {
+            return res.status(403).json({ message: 'You are not authorized to reject this reservation.' });
+        }
         if (reservation.reservation_status !== 'pending') {
             return res.status(400).json({ message: `This class has already been confirmed or rejected` });
         }
+        
 
         reservation.reservation_status = 'rejected';
         await reservation.save();
