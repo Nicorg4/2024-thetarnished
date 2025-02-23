@@ -19,7 +19,7 @@ const getSubjectById = async (req, res) =>{
 }
 
 const createSubject = async (req, res) =>{
-    const { subjectname } = req.body;
+    const { subjectname, class_price } = req.body;
     try{
         const subjectAlreadyExists = await Subject.findOne({
         where: {
@@ -31,7 +31,12 @@ const createSubject = async (req, res) =>{
             message: "Subject already exists"
         });
     }
-    const response = await Subject.create(req.body);
+    const response = await Subject.create(
+        {
+            subjectname,
+            class_price
+        }
+    );
     return res.status(200).json(response);
     }catch(error){
         /* istanbul ignore next */
