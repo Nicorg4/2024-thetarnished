@@ -6,14 +6,29 @@ const Reservation = require('../models/reservationModel');
 const cron = require('node-cron');
 const Schedule= require('../models/weeklyScheduleModel');
 const WeeklySchedule = require('../models/weeklyScheduleModel');
+const Vacation = require('../models/vacationModel');
 
 const createMonthlySchedule = async (datetime, teacherid, maxstudents, currentstudents) => {
   try {
     for (let i = 0; i < 4; i++) {
-      const scheduleDate = moment(datetime)  
-      .add(i * 7, 'days')  
-      .subtract(3, 'hours')  
-      .format('YYYY-MM-DD HH:mm:ss');  
+      const scheduleMoment = moment(datetime)
+        .add(i * 7, 'days')
+        .subtract(3, 'hours');
+      const scheduleDate = scheduleMoment.format('YYYY-MM-DD HH:mm:ss');
+
+      const vacation = await Vacation.findOne({
+        where: {
+          teacherid: teacherid,
+          status: 'approved',
+          start_date: { [Op.lte]: scheduleMoment.toDate() },
+          end_date: { [Op.gte]: scheduleMoment.toDate() }
+        }
+      });
+
+      if (vacation) {
+        console.log(`Skipping schedule creation for teacher ${teacherid} on ${scheduleDate} due to vacation.`);
+        continue;
+      }
 
       await MonthlySchedule.create({
         datetime: scheduleDate,
@@ -21,9 +36,9 @@ const createMonthlySchedule = async (datetime, teacherid, maxstudents, currentst
         maxstudents: maxstudents,
         currentstudents: currentstudents,
       });
+      console.log(`Schedule created: Teacher ${teacherid}, Date ${scheduleDate}`);
     }
   } catch (error) {
-    /* istanbul ignore next */
     throw error;
   }
 };
@@ -79,84 +94,6 @@ const getGroupClasses = async (req, res) => {
       res.status(500).send('Server error');
   }
 
-};
-
-const assignVacation = async (req, res) => {
-  try {
-    const { teacherid, startdate, enddate } = req.body;
-    const startDate = moment(startdate).startOf('day').toDate();
-    const endDate = moment(enddate).endOf('day').toDate();
-
-    const takenschedules = await MonthlySchedule.findAll({
-      where: {
-        teacherid: teacherid, 
-        datetime: {
-          [Op.between]: [startDate, endDate]
-        }, 
-        currentstudents: {
-          [Op.gt]: 0
-        }
-      }
-    });
-    if(takenschedules.length > 0){
-      return res.status(403).json({ message: 'cannot set vacations while having booked classes on that time gap' });
-    }
-    await Teacher.update({ on_vacation: true }, { where: { teacherid: teacherid } })
-    const schedules = await MonthlySchedule.findAll({
-      where: {
-        teacherid: teacherid, 
-        datetime: {
-          [Op.between]: [startDate, endDate]
-        }
-      }
-    });
-
-    if (schedules.length > 0) {
-      await MonthlySchedule.update(
-        { istaken: true },
-        {
-          where: {
-            monthlyscheduleid: {
-              [Op.in]: schedules.map(schedule => schedule.monthlyscheduleid)
-            }
-          }
-        }
-      );
-      const updatedSchedules = schedules.map(schedule => ({
-        ...schedule.toJSON(),
-        istaken: true
-      }));
-      res.status(200).json(updatedSchedules);
-    } else {
-      res.status(404).send('Schedules not found');
-    }
-  } catch (error) {
-    /*istanbul ignore next*/
-    res.status(500).send('Server error');
-  }
-};
-const stopVacation = async (req, res) => {
-  try {
-    const { teacherid } = req.body;
-    await Teacher.update({ on_vacation: false }, { where: { teacherid: teacherid } });
-
-    const schedules = await MonthlySchedule.findAll({
-      where: {
-        teacherid: teacherid,
-        istaken: true,
-        currentstudents: 0,
-      },
-    });
-
-    for (const schedule of schedules) {
-        await MonthlySchedule.update({ istaken: false }, { where: { monthlyscheduleid: schedule.monthlyscheduleid } })
-    }
-
-    return res.status(200).send('Vacation stopped and schedules updated');
-  } catch (error) {
-    /*istanbul ignore next*/
-    return res.status(500).send('Server error');
-  }
 };
 
 const getMonthlyScheduleByTeacherId = async (req, res) => {
@@ -289,11 +226,25 @@ const generateNextWeekSchedules = async () => {
           if (currentDay.isoWeekday() === Number(schedule.dayofweek)) {
             const time = moment(schedule.start_time, 'HH:mm:ss');
             const scheduledDate = currentDay.clone()
-            .hour(time.hour())
-            .minute(time.minute())
-            .second(time.second())
-            .subtract(3, 'hours');
+              .hour(time.hour())
+              .minute(time.minute())
+              .second(time.second())
+              .subtract(3, 'hours');
+
             if (scheduledDate.isSameOrBefore(endDate)) {
+              const vacation = await Vacation.findOne({
+                where: {
+                  teacherid: teacher.teacherid,
+                  status: 'approved',
+                  start_date: { [Op.lte]: scheduledDate },
+                  end_date: { [Op.gte]: scheduledDate }
+                }
+              });
+              if (vacation) {
+                console.log(`Skipping schedule for teacher ${teacher.teacherid} on ${scheduledDate.format('YYYY-MM-DD HH:mm:ss')} due to vacation.`);
+                continue;
+              }
+
               const existingSchedule = await MonthlySchedule.findOne({
                 where: {
                   teacherid: teacher.teacherid,
@@ -319,7 +270,7 @@ const generateNextWeekSchedules = async () => {
   }
 };
 
-cron.schedule('6 01 * * *', () => {
+cron.schedule('0 0 * * *', () => {
   console.log('Executing daily schedule update.');
   generateNextWeekSchedules();
 });
@@ -329,8 +280,6 @@ module.exports = {
   getIndividualClasses,
   getGroupClasses,
   createMonthlySchedule,
-  assignVacation,
   getMonthlyScheduleByTeacherId,
-  stopVacation,
   getMonthlySubjectScheduleByTeacherId
 };

@@ -44,7 +44,7 @@ const createReservation = async (req, res) => {
             where: {
                 student_id: student_id,
                 reservation_status: 'booked',
-                datetime: startTime
+                datetime: schedule.datetime
             }
         });
         if (existingStudentReservation) {
@@ -661,7 +661,7 @@ const confirmReservation = async (req, res) => {
             return res.status(404).json({ message: 'Reservation not found' });
         }
         if (reservation.reservation_status === 'canceled' || reservation.reservation_status === 'finished' || reservation.reservation_status === 'booked', reservation.reservation_status === 'rejected', reservation.reservation_status === 'terminated') {
-            return res.status(400).json({ message: `Cannot cancel a reservation with status '${reservation.reservation_status}'` });
+            return res.status(400).json({ message: `This class has already been confirmed or rejected` });
         }
         const schedule = await MonthlySchedule.findByPk(reservation.schedule_id);
 	    const date = new Date(schedule.datetime);
@@ -725,7 +725,7 @@ const rejectReservation = async (req, res) => {
             return res.status(404).json({ message: 'Reservation not found' });
         }
         if (reservation.reservation_status !== 'pending') {
-            return res.status(400).json({ message: `Cannot cancel a reservation with status '${reservation.reservation_status}'` });
+            return res.status(400).json({ message: `This class has already been confirmed or rejected` });
         }
 
         reservation.reservation_status = 'rejected';

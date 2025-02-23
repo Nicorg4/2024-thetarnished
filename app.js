@@ -18,8 +18,9 @@ const examRoutes = require('./routes/examRoutes');
 const informationRoutes = require('./routes/informationRoutes');
 const quizRoutes = require('./routes/quizRoutes');
 const fileRoutes = require('./routes/fileRoutes');
-const chatRoutes = require('./routes/chatRoutes');
+/* const chatRoutes = require('./routes/chatRoutes'); */
 const meetingRoutes = require('./routes/meetingRoutes');
+const vacationRoutes = require('./routes/vacationRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -30,7 +31,7 @@ const io = new Server(server, {
       "http://192.168.0.86:5173",
       "https://linkandlearn.fpenonori.com"
     ],
-    methods: ["GET", "POST"]
+    methods: ["GET", "POST"],
   }
 });
 
@@ -52,6 +53,7 @@ app.use(cors({
 }));
 
 defineAssociations();
+app.options('*', cors());
 
 app.use(express.json());
 
@@ -69,6 +71,7 @@ app.use('/information', informationRoutes);
 app.use('/quiz', quizRoutes);
 app.use('/files', fileRoutes);
 app.use('/meeting', meetingRoutes);
+app.use('/vacation', vacationRoutes);
 /* app.use('/api/chat', chatRoutes); */
 
 chatSockets(io);

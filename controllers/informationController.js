@@ -136,6 +136,11 @@ const getUsersRanking = async (req, res) => {
         const teachers = await Teacher.findAll({
             order: [['xp', 'DESC']],
             attributes: ['firstname', 'lastname', 'xp'],
+            where: {
+                is_active: {
+                    [Op.ne]: false,
+                }
+            },
         });
 
         const formattedStudents = students.map(student => ({

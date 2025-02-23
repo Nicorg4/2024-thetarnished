@@ -30,8 +30,8 @@ router.put('/confirm', authorizeRoles('TEACHER'), confirmPayment);
 router.delete('/cancel-group/:id', authorizeRoles('TEACHER'), cancelGroupClass);
 router.get('/in-debt-classes/:id', authorizeRoles('TEACHER'), getInDebtClassesById);
 router.get('/terminated-reservations-by/:teacher_id', authorizeRoles('TEACHER'), getTerminatedReservationsByTeacherId);
-router.put('/confirm-reservation/:id', authorizeRoles('TEACHER'), confirmReservation);
-router.put('/reject/:id', authorizeRoles('TEACHER'), rejectReservation);
+router.post('/confirm-reservation/:id', authorizeRoles('TEACHER'), confirmReservation);
+router.post('/reject/:id', authorizeRoles('TEACHER'), rejectReservation);
 
 
 

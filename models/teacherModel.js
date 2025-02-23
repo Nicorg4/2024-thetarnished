@@ -34,11 +34,6 @@ const Teacher = sequelize.define('Teacher', {
     allowNull: false,
     defaultValue: false  
   },
-  on_vacation: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: false
-  },
   avatar_id: {
     type: DataTypes.INTEGER,
     defaultValue: 1

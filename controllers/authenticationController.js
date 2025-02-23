@@ -17,6 +17,8 @@ const { Op } = require('sequelize');
 const e = require('express');
 const { updateTeacherSubjects } = require('./teacherController');
 const jwt = require('jsonwebtoken');
+const Vacation = require('../models/vacationModel');
+const moment = require('moment');
 
 
 
@@ -81,7 +83,7 @@ const createUser = async (req, res) => {
     } catch (error){
         /*istanbul ignore next*/
         console.log(error);
-        return res.status(500).json({message: 'Internal server error'});
+        return res.status(500).json({message: 'There was an error while trying to process your request'});
     }
 };
 
@@ -141,14 +143,13 @@ const loginUser = async (req, res) => {
         
         const user = await findUser(email);
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ message: 'Invalid credentials' });
         }
         
         let role;
         let userid;
         let formattedSchedule = [];
         let subjects = [];
-
         
         if (user instanceof Teacher) {
             role = 'TEACHER';
@@ -167,7 +168,7 @@ const loginUser = async (req, res) => {
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            return res.status(401).json({ message: 'Invalid password' });
+            return res.status(401).json({ message: 'Invalid credentials' });
         }
 
         const userData = {
@@ -184,7 +185,29 @@ const loginUser = async (req, res) => {
 
         if (role === 'TEACHER') {
             userData.isActive = user.is_active;
-            userData.on_vacation = user.on_vacation;
+        
+            const currentVacation = await Vacation.findOne({
+              where: {
+                teacherid: user.teacherid,
+                status: 'approved',
+                start_date: { [Op.lte]: new Date() },
+                end_date: { [Op.gte]: new Date() }
+              }
+            });
+            userData.on_vacation = !!currentVacation;
+            
+            const plannedVacation = await Vacation.findOne({
+              where: {
+                teacherid: user.teacherid,
+                status: 'approved'
+              }
+            });
+            userData.has_planned_vacation = !!plannedVacation;
+            if (plannedVacation) {
+                userData.vacation_range = `From ${moment(plannedVacation.start_date).format('YYYY-MM-DD')} to ${moment(plannedVacation.end_date).format('YYYY-MM-DD')}`;
+              } else {
+                userData.vacation_range = null;
+              }
         }
 
         const token = jwt.sign(userData, process.env.JWT_AUTH_SECRET, { expiresIn: '3h' });
