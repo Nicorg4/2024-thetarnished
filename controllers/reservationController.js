@@ -663,6 +663,7 @@ const confirmReservation = async (req, res) => {
         if (reservation.reservation_status === 'canceled' || reservation.reservation_status === 'finished' || reservation.reservation_status === 'booked', reservation.reservation_status === 'rejected', reservation.reservation_status === 'terminated') {
             return res.status(400).json({ message: `This class has already been confirmed or rejected` });
         }
+        
         const schedule = await MonthlySchedule.findByPk(reservation.schedule_id);
 	    const date = new Date(schedule.datetime);
         const day = String(date.getDate()).padStart(2, '0');
@@ -701,6 +702,9 @@ const confirmReservation = async (req, res) => {
         
         reservation.reservation_status = 'booked';
         await reservation.save();
+
+        teacher.xp = (Number(teacher.xp) || 0) + 50;
+        await teacher.save();
 
         setImmediate(async () => {
             try {
