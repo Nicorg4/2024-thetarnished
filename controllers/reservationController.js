@@ -24,14 +24,15 @@ const createReservation = async (req, res) => {
         if(schedule.currentstudents > 0) {
             const reservations = await Reservation.findOne({
                 where: {
-                    schedule_id: schedule_id,  
-                    [Op.or]: [
-                        
-                        { student_id: student_id },
-                        { subject_id: { [Op.not]: subject_id } }
-                    ]
+                  schedule_id: schedule_id,
+                  reservation_status: { [Op.ne]: 'rejected' },
+                  [Op.or]: [
+                    { student_id: student_id },
+                    { subject_id: { [Op.not]: subject_id } }
+                  ]
                 }
-            });
+              });
+              
         
             if(reservations) {
                 return res.status(403).json({
